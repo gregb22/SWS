@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from run_RK4 import run_rk4_chirp, NonlinearElement, NL_CUBIC, NL_HERTZ, NL_PIECEWISE, NL_CUBIC
+from run_RK4 import run_rk4_chirp, NonlinearElement, NL_CUBIC, NL_HERTZ, NL_PIECEWISE, NL_QUADRATIC
 
 
 def steady_state_amplitude_fast(M, C, K, fext, nl_elements, x0, v0, freq, forcing,
@@ -14,7 +14,7 @@ def steady_state_amplitude_fast(M, C, K, fext, nl_elements, x0, v0, freq, forcin
                                 n_periods_window=100):
     T = 1.0 / freq # freq in hz
     t_end = n_periods_total * T # time in seconds for n_periods_total
-    ts = 1.0 / (200.0 / (2.0 * np.pi)) # sampling time in seconds
+    ts = 1.0 / (100.0 / (2.0 * np.pi)) # sampling time in seconds
     chirp_type = 2
     t, sol = run_rk4_chirp(M, C, K, fext, forcing, freq, freq, t_end, ts, chirp_type,
                            nl_elements=nl_elements, q0=x0, qd0=v0, verbose=False)
@@ -56,20 +56,20 @@ if __name__ == "__main__":
     K = np.array([1])
 
     #Parameters for PWL : (gap, slopes)
-    nl_elements = [NonlinearElement(dof_i=0, dof_j=-1, nl_type=NL_CUBIC, params=(1.0,))]
+    nl_elements = [NonlinearElement(dof_i=0, dof_j=-1, nl_type=NL_CUBIC, params=(1.0,)), NonlinearElement(dof_i=0, dof_j=-1, nl_type=NL_QUADRATIC, params=(0.2,))]
     fext  = np.array([1.0]) # Uncomment for 1-DOF Duffing oscillator
-    f_amp = 3.0 # Forcing amplitude (N)
+    f_amp = 1.0 # Forcing amplitude (N)
 
     # ---------------------------
     # Basin computation parameters
     # ---------------------------
-    om = 2.7 # rad/s
+    om = 0.46 # rad/s
     freq = om/(2.0 * np.pi)  # Hz
-    Nx0 = 600
-    Nv0 = 1200
+    Nx0 = 300
+    Nv0 = 300
 
-    grid_x0 = np.linspace(0, 1.5, Nx0)
-    grid_v0 = np.linspace(-2, 1.0, Nv0)
+    grid_x0 = np.linspace(-10, 10, Nx0)
+    grid_v0 = np.linspace(-10, 10, Nv0)
 
     basin = np.zeros((Nx0, Nv0))
 
